@@ -1,0 +1,73 @@
+{
+  "timestamp": "20260215_003104",
+  "run_dir": "outputs/v3/v3_20260215_003104",
+  "seeds": [
+    20240202
+  ],
+  "train": [
+    "2014-01-01",
+    "2019-12-31"
+  ],
+  "valid_periods": [
+    [
+      "2020-01-01",
+      "2020-12-31"
+    ],
+    [
+      "2021-01-01",
+      "2021-12-31"
+    ],
+    [
+      "2022-01-01",
+      "2022-12-31"
+    ]
+  ],
+  "holdout": [
+    "2023-01-01",
+    "2024-12-31"
+  ],
+  "pressure": [
+    "2025-01-01",
+    "2025-12-31"
+  ],
+  "valid_agg": "min",
+  "valid_score_mode": "bullbear_rule",
+  "batch_size": 32,
+  "train_steps": 5,
+  "max_formula_len": 12,
+  "token_mode": "postfix",
+  "backtest_mode": "joinquant_like",
+  "post_refine_trials": 0,
+  "post_refine_mutations": 1,
+  "valid_bull_weight": null,
+  "valid_bear_weight": null,
+  "pass_mode": "strict",
+  "pass_holdout_excess_min_pct": 0.0,
+  "target_pass_n": 1,
+  "pass_n": 0,
+  "total_n": 1,
+  "pass_rate": 0.0,
+  "results": [
+    {
+      "seed": 20240202,
+      "passed": false,
+      "formula": "[19, 5, 17, 15, 9, 20, 14, 9, 20, 20, 6, 6]",
+      "passed_holdout_only": false,
+      "passed_3seg": false,
+      "train_bench%": 75.81685781478882,
+      "train_total%": 77.65227825242394,
+      "train_excess%": 1.8354204376351158,
+      "valid_bench%": -5.4912269115448,
+      "valid_total%": -11.566767464825967,
+      "valid_excess%": -6.075540553281167,
+      "holdout_bench%": 1.634371280670166,
+      "holdout_total%": -3.9084497566267307,
+      "holdout_excess%": -5.542821037296896,
+      "holdout_is_bull": true,
+      "test_2025_bench%": 17.663168907165527,
+      "test_2025_total%": 7.317142664406284,
+      "test_2025_excess%": -10.346026242759244,
+      "summary_csv": "outputs/v3/v3_20260215_003104/seed_20240202/backtest_summary.csv"
+    }
+  ]
+}

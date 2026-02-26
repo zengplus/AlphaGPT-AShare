@@ -1,0 +1,2 @@
+period_start,period_end,bench_is_bull,objective_score,excess_total_return_pct,bench_total_return_pct,port_total_return_pct,beta,gate_pass,fail_reason
+2019-04-01,2019-06-30,False,-222.68309020996094,-8.424806594848633,-4.386870190501213,-12.811677157878876,1.0528591871261597,True,

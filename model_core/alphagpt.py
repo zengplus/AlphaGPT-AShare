@@ -1,3 +1,9 @@
+""" 
+ File: alphagpt.py
+ Date: 2026-01-17
+ Description: AlphaGPT 模型与正则化工具。定义了 AlphaGPT 核心模型结构，以及用于模型压缩和优化的 Low-Rank Decay (LoRD) 正则化器和稳定秩监控器。
+ From: https://github.com/imbue-bit/AlphaGPT
+ """ 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -222,10 +228,11 @@ class AlphaGPT(nn.Module):
     def __init__(self):
         super().__init__()
         self.d_model = 64
-        self.features_list = ['RET', 'VOL', 'V_CHG', 'PV', 'TREND']
+        self.base_features_list = ['RET', 'LIQ', 'PRESS', 'FOMO', 'DEV', 'VOL']
+        self.extra_features_list = ['MOM20', 'REL_MOM20']
         self.ops_list = [cfg[0] for cfg in OPS_CONFIG]
         
-        self.vocab = self.features_list + self.ops_list
+        self.vocab = self.base_features_list + self.ops_list + self.extra_features_list
         self.vocab_size = len(self.vocab)
         
         # Embedding

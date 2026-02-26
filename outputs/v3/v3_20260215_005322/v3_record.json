@@ -1,0 +1,117 @@
+{
+  "timestamp": "20260215_005322",
+  "run_dir": "outputs/v3/v3_20260215_005322",
+  "seeds": [
+    20240202,
+    20240303,
+    20240909
+  ],
+  "train": [
+    "2014-01-01",
+    "2019-12-31"
+  ],
+  "valid_periods": [
+    [
+      "2020-01-01",
+      "2020-12-31"
+    ],
+    [
+      "2021-01-01",
+      "2021-12-31"
+    ],
+    [
+      "2022-01-01",
+      "2022-12-31"
+    ]
+  ],
+  "holdout": [
+    "2023-01-01",
+    "2024-12-31"
+  ],
+  "pressure": [
+    "2025-01-01",
+    "2025-12-31"
+  ],
+  "valid_agg": "min",
+  "valid_score_mode": "bullbear_rule",
+  "batch_size": 128,
+  "train_steps": 300,
+  "max_formula_len": 12,
+  "token_mode": "postfix",
+  "backtest_mode": "joinquant_like",
+  "post_refine_trials": 0,
+  "post_refine_mutations": 1,
+  "valid_bull_weight": null,
+  "valid_bear_weight": null,
+  "pass_mode": "strict",
+  "pass_holdout_excess_min_pct": 0.0,
+  "target_pass_n": 1,
+  "pass_n": 1,
+  "total_n": 3,
+  "pass_rate": 0.3333333333333333,
+  "results": [
+    {
+      "seed": 20240202,
+      "passed": false,
+      "formula": "[4, 2, 2, 9, 10, 9, 3, 3, 11, 11, 6, 6]",
+      "passed_holdout_only": false,
+      "passed_3seg": false,
+      "train_bench%": 75.81685781478882,
+      "train_total%": 70.89460095717952,
+      "train_excess%": -4.922256857609297,
+      "valid_bench%": -5.4912269115448,
+      "valid_total%": 31.223246535207693,
+      "valid_excess%": 36.71447344675249,
+      "holdout_bench%": 1.634371280670166,
+      "holdout_total%": -6.174430594957158,
+      "holdout_excess%": -7.808801875627324,
+      "holdout_is_bull": true,
+      "test_2025_bench%": 17.663168907165527,
+      "test_2025_total%": 14.612464549676908,
+      "test_2025_excess%": -3.0507043574886206,
+      "summary_csv": "outputs/v3/v3_20260215_005322/seed_20240202/backtest_summary.csv"
+    },
+    {
+      "seed": 20240303,
+      "passed": true,
+      "formula": "[1, 10, 3, 17, 11, 16, 17, 19, 16, 6, 7, 18]",
+      "passed_holdout_only": true,
+      "passed_3seg": true,
+      "train_bench%": 75.81685781478882,
+      "train_total%": 82.46921328969918,
+      "train_excess%": 6.652355474910365,
+      "valid_bench%": -5.4912269115448,
+      "valid_total%": 15.710276543702562,
+      "valid_excess%": 21.201503455247362,
+      "holdout_bench%": 1.634371280670166,
+      "holdout_total%": 27.343970097686878,
+      "holdout_excess%": 25.709598817016712,
+      "holdout_is_bull": true,
+      "test_2025_bench%": 17.663168907165527,
+      "test_2025_total%": 12.36360593953143,
+      "test_2025_excess%": -5.299562967634097,
+      "summary_csv": "outputs/v3/v3_20260215_005322/seed_20240303/backtest_summary.csv"
+    },
+    {
+      "seed": 20240909,
+      "passed": false,
+      "formula": "[4, 16, 0, 14, 15, 2, 7, 0, 9, 9]",
+      "passed_holdout_only": true,
+      "passed_3seg": false,
+      "train_bench%": 75.81685781478882,
+      "train_total%": 30.71491078466877,
+      "train_excess%": -45.10194703012005,
+      "valid_bench%": -5.4912269115448,
+      "valid_total%": 90.20646868143835,
+      "valid_excess%": 95.69769559298315,
+      "holdout_bench%": 1.634371280670166,
+      "holdout_total%": 12.195407986517681,
+      "holdout_excess%": 10.561036705847515,
+      "holdout_is_bull": true,
+      "test_2025_bench%": 17.663168907165527,
+      "test_2025_total%": 5.2778906253806435,
+      "test_2025_excess%": -12.385278281784885,
+      "summary_csv": "outputs/v3/v3_20260215_005322/seed_20240909/backtest_summary.csv"
+    }
+  ]
+}

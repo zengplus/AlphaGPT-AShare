@@ -1,3 +1,9 @@
+""" 
+ File: factors.py
+ Date: 2026-01-17
+ Description: 因子工程与技术指标库。包含 RMSNormFactor 归一化层和多种技术指标计算逻辑（如流动性健康度、买卖失衡、动量反转等），用于特征提取。
+ From: https://github.com/imbue-bit/AlphaGPT
+ """ 
 import torch
 import torch.nn as nn
 
@@ -29,9 +35,10 @@ class MemeIndicators:
 
     @staticmethod
     def fomo_acceleration(volume, window=5):
-        vol_prev = torch.roll(volume, 1, dims=1)
+        vol_prev = torch.cat([volume[:, :1], volume[:, :-1]], dim=1)
         vol_chg = (volume - vol_prev) / (vol_prev + 1.0)
-        acc = vol_chg - torch.roll(vol_chg, 1, dims=1)
+        vol_chg_prev = torch.cat([vol_chg[:, :1], vol_chg[:, :-1]], dim=1)
+        acc = vol_chg - vol_chg_prev
         return torch.clamp(acc, -5.0, 5.0)
 
     @staticmethod
@@ -95,12 +102,25 @@ class AdvancedFactorEngineer:
     def __init__(self):
         self.rms_norm = RMSNormFactor(1)
     
-    def robust_norm(self, t):
-        """Robust normalization using median absolute deviation"""
-        median = torch.nanmedian(t, dim=1, keepdim=True)[0]
-        mad = torch.nanmedian(torch.abs(t - median), dim=1, keepdim=True)[0] + 1e-6
-        norm = (t - median) / mad
-        return torch.clamp(norm, -5.0, 5.0)
+    def robust_norm(self, t, window=120):
+        """Robust normalization using rolling window (Median/MAD) to avoid look-ahead bias"""
+        # print(f"DEBUG: Using Rolling Robust Norm (Window={window})")
+        # Pad with NaNs to shift the window (past values only)
+        pad = torch.full((t.shape[0], window - 1), float('nan'), device=t.device, dtype=t.dtype)
+        t_pad = torch.cat([pad, t], dim=1)
+        
+        # Unfold: (Assets, Time, Window)
+        t_windows = t_pad.unfold(1, window, 1)
+        
+        # Compute Rolling Median
+        median_val = torch.nanmedian(t_windows, dim=-1)[0]
+        
+        # Compute Rolling MAD
+        abs_diff = torch.abs(t_windows - median_val.unsqueeze(-1))
+        mad_val = torch.nanmedian(abs_diff, dim=-1)[0] + 1e-6
+        
+        norm = (t - median_val) / mad_val
+        return torch.clamp(norm, -5.0, 5.0).nan_to_num(0.0)
     
     def compute_advanced_features(self, raw_dict):
         """Compute 12-dimensional feature space with advanced factors"""
@@ -166,18 +186,41 @@ class FeatureEngineer:
         liq = raw_dict['liquidity']
         fdv = raw_dict['fdv']
         
-        ret = torch.log(c / (torch.roll(c, 1, dims=1) + 1e-9))
+        c_prev = torch.cat([c[:, :1], c[:, :-1]], dim=1)
+        ret = torch.log(c / (c_prev + 1e-9))
         liq_score = MemeIndicators.liquidity_health(liq, fdv)
         pressure = MemeIndicators.buy_sell_imbalance(c, o, h, l)
         fomo = MemeIndicators.fomo_acceleration(v)
         dev = MemeIndicators.pump_deviation(c)
         log_vol = torch.log1p(v)
+        c_lag20 = torch.cat([c[:, :1].repeat(1, 20), c[:, :-20]], dim=1) if c.shape[1] > 20 else c_prev
+        mom20 = torch.log(c / (c_lag20 + 1e-9))
+        bench_ret = raw_dict.get('bench_ret', None)
+        if bench_ret is None:
+            bench_ret = torch.zeros((c.shape[1],), device=c.device, dtype=c.dtype)
+        bench_ret = bench_ret.reshape(-1)
+        if bench_ret.numel() != c.shape[1]:
+            bench_ret = torch.zeros((c.shape[1],), device=c.device, dtype=c.dtype)
+        if bench_ret.numel() >= 20:
+            pad = torch.zeros((19,), device=c.device, dtype=c.dtype)
+            bench_mom20 = torch.cat([pad, bench_ret], dim=0).unfold(0, 20, 1).sum(dim=-1)
+        else:
+            bench_mom20 = torch.zeros((c.shape[1],), device=c.device, dtype=c.dtype)
+        rel_mom20 = mom20 - bench_mom20.unsqueeze(0)
         
-        def robust_norm(t):
-            median = torch.nanmedian(t, dim=1, keepdim=True)[0]
-            mad = torch.nanmedian(torch.abs(t - median), dim=1, keepdim=True)[0] + 1e-6
-            norm = (t - median) / mad
-            return torch.clamp(norm, -5.0, 5.0)
+        def robust_norm(t, window=120):
+            if t.dim() != 2 or t.shape[1] < 2:
+                return torch.zeros_like(t)
+            w = int(min(window, t.shape[1]))
+            pad = t[:, :1].repeat(1, w - 1)
+            t_pad = torch.cat([pad, t], dim=1)
+            t_windows = t_pad.unfold(1, w, 1)
+            median_val = torch.median(t_windows, dim=-1).values
+            abs_diff = torch.abs(t_windows - median_val.unsqueeze(-1))
+            mad_val = torch.median(abs_diff, dim=-1).values + 1e-6
+            norm = (t - median_val) / mad_val
+            norm = torch.clamp(norm, -5.0, 5.0)
+            return torch.nan_to_num(norm, nan=0.0, posinf=0.0, neginf=0.0)
 
         features = torch.stack([
             robust_norm(ret),
@@ -185,7 +228,9 @@ class FeatureEngineer:
             pressure,
             robust_norm(fomo),
             robust_norm(dev),
-            robust_norm(log_vol)
+            robust_norm(log_vol),
+            robust_norm(mom20),
+            robust_norm(rel_mom20)
         ], dim=1)
         
         return features
